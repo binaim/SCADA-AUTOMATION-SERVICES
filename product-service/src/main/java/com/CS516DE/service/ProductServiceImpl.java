@@ -11,13 +11,11 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import lombok.extern.slf4j.Slf4j;
 
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-@Slf4j
+
 public class ProductServiceImpl implements ProductService {
 
     private DynamoDBMapper dynamoDBMapper;
