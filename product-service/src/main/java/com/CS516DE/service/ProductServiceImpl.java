@@ -26,14 +26,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public APIGatewayProxyResponseEvent getProductById(APIGatewayProxyRequestEvent apiGatewayRequest, Context context){
         initDynamoDB();
-        String productId = apiGatewayRequest.getPathParameters().get("productID");
+        String productId = apiGatewayRequest.getPathParameters().get("productId");
         Product product =   dynamoDBMapper.load(Product.class,productId)  ;
         if(product!=null) {
             jsonBody = Utility.convertObjToString(product, context);
-            context.getLogger().log("fetch employee By ID:::" + jsonBody);
+            context.getLogger().log("fetch product By ID:::" + jsonBody);
             return createAPIResponse(jsonBody,200,Utility.createHeaders());
         }else{
-            jsonBody = "Employee Not Found Exception :" + productId;
+            jsonBody = "Product Not Found Exception :" + productId;
             return createAPIResponse(jsonBody,400,Utility.createHeaders());
         }
 
@@ -41,9 +41,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public APIGatewayProxyResponseEvent getAllProducts(APIGatewayProxyRequestEvent apiGatewayRequest, Context context){
         initDynamoDB();
-        List<Product> employees = dynamoDBMapper.scan(Product.class,new DynamoDBScanExpression());
-        jsonBody =  Utility.convertListOfObjToString(employees,context);
-        context.getLogger().log("fetch employee List:::" + jsonBody);
+        List<Product> products = dynamoDBMapper.scan(Product.class,new DynamoDBScanExpression());
+        jsonBody =  Utility.convertListOfObjToString(products,context);
+        context.getLogger().log("fetch product List:::" + jsonBody);
         return createAPIResponse(jsonBody,200,Utility.createHeaders());
     }
 //    @Override
@@ -77,14 +77,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public APIGatewayProxyResponseEvent deleteProductById(APIGatewayProxyRequestEvent apiGatewayRequest, Context context){
         initDynamoDB();
-        String productId = apiGatewayRequest.getPathParameters().get("empId");
+        String productId = apiGatewayRequest.getPathParameters().get("productId");
         Product product =  dynamoDBMapper.load(Product.class,productId)  ;
         if(product!=null) {
             dynamoDBMapper.delete(product);
             context.getLogger().log("data deleted successfully :::" + productId);
             return createAPIResponse("data deleted successfully." + productId,200,Utility.createHeaders());
         }else{
-            jsonBody = "Employee Not Found Exception :" + productId;
+            jsonBody = "product Not Found Exception :" + productId;
             return createAPIResponse(jsonBody,400,Utility.createHeaders());
         }
     }

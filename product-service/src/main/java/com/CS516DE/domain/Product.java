@@ -14,7 +14,7 @@ import lombok.*;
 public class Product {
 
     @DynamoDBHashKey(attributeName = "productId")
-    private Long id;
+    private String productId;
 
     @DynamoDBAttribute(attributeName = "name")
     private String name;
@@ -31,12 +31,12 @@ public class Product {
     @DynamoDBAttribute(attributeName = "price")
     private double price;
 
-    public Product(String name, String vendor, String category, int quantity, double price) {
-        this.name = name;
-        this.vendor = vendor;
-        this.category = category;
-        this.quantity = quantity;
-        this.price = price;
-    }
+//    public Product(String name, String vendor, String category, int quantity, double price) {
+//        this.name = name;
+//        this.vendor = vendor;
+//        this.category = category;
+//        this.quantity = quantity;
+//        this.price = price;
+//    }
 
 }
