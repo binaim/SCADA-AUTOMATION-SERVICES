@@ -14,6 +14,6 @@ import java.util.List;
 public interface OrderService {
     public APIGatewayProxyResponseEvent getAllOrders(APIGatewayProxyRequestEvent apiGatewayRequest, Context context);
     public APIGatewayProxyResponseEvent getOrderById(APIGatewayProxyRequestEvent requestEvent, Context context);
-    public APIGatewayProxyResponseEvent placeOrder(APIGatewayProxyRequestEvent requestEvent, Context context) throws IOException;
+    public APIGatewayProxyResponseEvent placeOrder(APIGatewayProxyRequestEvent requestEvent, Context context) throws IOException, InterruptedException;
     public APIGatewayProxyResponseEvent deleteOrderById(APIGatewayProxyRequestEvent requestEvent, Context context);
 }

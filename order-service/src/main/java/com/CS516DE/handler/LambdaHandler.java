@@ -22,7 +22,7 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
             case "POST":
                 try {
                     return orderService.placeOrder(apiGatewayRequest, context);
-                } catch (IOException e) {
+                } catch (IOException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }
 
