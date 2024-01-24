@@ -31,12 +31,6 @@ public class Product {
     @DynamoDBAttribute(attributeName = "price")
     private double price;
 
-//    public Product(String name, String vendor, String category, int quantity, double price) {
-//        this.name = name;
-//        this.vendor = vendor;
-//        this.category = category;
-//        this.quantity = quantity;
-//        this.price = price;
-//    }
+
 
 }

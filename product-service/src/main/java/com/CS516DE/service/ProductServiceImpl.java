@@ -3,6 +3,7 @@ package com.CS516DE.service;
 
 import com.CS516DE.domain.Product;
 import com.CS516DE.utility.Utility;
+import com.CS516DE.vo.Availability;
 import com.CS516DE.vo.OrderItem;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -13,8 +14,12 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
 
+import java.net.http.HttpResponse;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ProductServiceImpl implements ProductService {
 
@@ -44,12 +49,7 @@ public class ProductServiceImpl implements ProductService {
         context.getLogger().log("fetch product List:::" + jsonBody);
         return createAPIResponse(jsonBody,200,Utility.createHeaders());
     }
-//    @Override
-//    public APIGatewayProxyResponseEvent saveProduct(Product product) {
-//        productRepository.save(product);
-//        log.info("Product {} is saved.", product.getId());
-//        return product;
-//    }
+
 
     @Override
     public APIGatewayProxyResponseEvent saveProduct(APIGatewayProxyRequestEvent apiGatewayRequest, Context context){
@@ -60,18 +60,7 @@ public class ProductServiceImpl implements ProductService {
         context.getLogger().log("data saved successfully to dynamodb:::" + jsonBody);
         return createAPIResponse(jsonBody,201,Utility.createHeaders());
     }
-//    @Override
-//    public void deleteProductById(Long id) {
-//        productRepository.deleteById(id);
-//    }
 
-//    @Override
-//    public Product reduceQuantityByProductId(Long id, int reduceAmount) {
-//        Product product = productRepository.findById(id).get();
-//        int newQuantity = product.getQuantity() - reduceAmount;
-//        product.setQuantity(newQuantity);
-//        return productRepository.save(product);
-//    }
     @Override
     public APIGatewayProxyResponseEvent deleteProductById(APIGatewayProxyRequestEvent apiGatewayRequest, Context context){
         initDynamoDB();
@@ -87,53 +76,63 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+
+
+
     @Override
-    public Product addQuantityByProductId(Long id, int increaseAmount) {
-        return null;
+    public APIGatewayProxyResponseEvent addQuantityByProductId(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        initDynamoDB();
+        String productId = requestEvent.getPathParameters().get("productId");
+        String increaseAmount = requestEvent.getQueryStringParameters().get("quantity");
+        Product product = dynamoDBMapper.load(Product.class, productId);
+        int newQuantity = product.getQuantity() + Integer.getInteger(increaseAmount);
+        product.setQuantity(newQuantity);
+        dynamoDBMapper.save(product);
+        context.getLogger().log("data updated successfully to dynamodb:::" + jsonBody);
+        jsonBody = Utility.convertObjToString(product, context);
+        return createAPIResponse(jsonBody, 201, Utility.createHeaders());
     }
 
     @Override
-    public boolean fulfillOrder(List<OrderItem> orderItems) {
-        return false;
+    public APIGatewayProxyResponseEvent fulfillOrder(APIGatewayProxyRequestEvent requestEvent, Context context) {
+        initDynamoDB();
+        context.getLogger().log("in the product fulfillOrder method");
+
+        List<OrderItem> orderItems = Utility.convertStringToListObj(requestEvent.getBody(), context);
+        List<String> productIds = orderItems.stream().map(p -> p.getProductId()).collect(Collectors.toList());
+        //List<Product> orderProducts = dynamoDBMapper.load(Product.class, productIds);
+        List<Product> orderProducts = productIds.stream().map(id -> dynamoDBMapper.load(Product.class,id)).collect(Collectors.toList());
+        Map<Product, Integer> productAndQuantity = new HashMap<>();
+
+        for (Product product : orderProducts) {
+            context.getLogger().log("in the for loop");
+            for (OrderItem orderItem : orderItems) {
+                if (Objects.equals(orderItem.getProductId(), product.getProductId())) {
+                    if (product.getQuantity() < orderItem.getQuantity()) {
+                        jsonBody = Utility.convertObjToString(new Availability(false), context);
+                        return createAPIResponse(jsonBody, 200, Utility.createHeaders());
+                    } else {
+                        productAndQuantity.put(product, orderItem.getQuantity());
+                    }
+                }
+            }
+        }
+        productAndQuantity.forEach((p, q) -> {
+            p.setQuantity(p.getQuantity() - q);
+            if (p.getQuantity() < 50){
+
+                context.getLogger().log("This product [{} {}] quantity is {}. Quantity is running low!" +
+                        p.getProductId() + p.getName() + p.getQuantity());
+
+            }
+        });
+        context.getLogger().log("product-service before returning to the order-service");
+
+
+        jsonBody = Utility.convertObjToString(new Availability(true), context);
+        context.getLogger().log(jsonBody);
+        return createAPIResponse(jsonBody, 200, Utility.createHeaders());
     }
-
-//    @Override
-//    public Product addQuantityByProductId(Long id, int increaseAmount) {
-//        Product product = productRepository.findById(id).get();
-//        int newQuantity = product.getQuantity() + increaseAmount;
-//        product.setQuantity(newQuantity);
-//        return productRepository.save(product);
-//    }
-
-//    @Override
-//    public boolean fulfillOrder(List<OrderItem> orderItems) {
-//
-//        List<Long> productIds = orderItems.stream().map(OrderItem::getProductId).toList();
-//        List<Product> orderProducts = productRepository.findByIdIn(productIds);
-//
-//        Map<Product, Integer> productAndQuantity = new HashMap<>();
-//
-//        for (Product product : orderProducts) {
-//            for (OrderItem orderItem : orderItems) {
-//                if (product.getId() == orderItem.getProductId()) {
-//                    if (product.getQuantity() < orderItem.getQuantity()) {
-//                        return false;
-//                    } else {
-//                        productAndQuantity.put(product, orderItem.getQuantity());
-//                    }
-//                }
-//            }
-//        }
-//        productAndQuantity.forEach((p, q) -> {
-//            p.setQuantity(p.getQuantity() - q);
-//            if (p.getQuantity() < 50){
-//                log.info("This product [{} {}] quantity is {}. Quantity is running low!",
-//                        p.getId(), p.getName(), p.getQuantity());
-//            }
-//        });
-//
-//        return true;
-//    }
 
     private void initDynamoDB(){
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().build();

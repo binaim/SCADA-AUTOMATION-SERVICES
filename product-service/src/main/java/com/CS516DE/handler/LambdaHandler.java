@@ -13,6 +13,7 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
     @Override
     public APIGatewayProxyResponseEvent  handleRequest(APIGatewayProxyRequestEvent apiGatewayRequest, Context context) {
         ProductService productService = new ProductServiceImpl();
+
         switch (apiGatewayRequest.getHttpMethod()) {
 
             case "POST":
@@ -27,6 +28,12 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
                 if (apiGatewayRequest.getPathParameters() != null) {
                     return productService.deleteProductById(apiGatewayRequest, context);
                 }
+            case "PUT":
+
+                    context.getLogger().log("product-service has been invoked");
+
+                    return productService.fulfillOrder(apiGatewayRequest, context);
+
             default:
                 throw new Error("Unsupported Methods:::" + apiGatewayRequest.getHttpMethod());
 
