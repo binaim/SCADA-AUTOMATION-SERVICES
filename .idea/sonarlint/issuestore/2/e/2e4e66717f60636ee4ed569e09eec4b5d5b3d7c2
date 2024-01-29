@@ -1,0 +1,4 @@
+
+b	java:S112&"FDefine and throw a dedicated exception instead of using a generic one.(ÒÔ³™8Å©Ì¬Ó1
+{	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(¯ıÕáûÿÿÿÿ8Æ©Ì¬Ó1
+m	java:S128"LEnd this switch case with an unconditional break, return or throw statement.(ñ™µúÿÿÿÿ8Ï©Ì¬Ó1

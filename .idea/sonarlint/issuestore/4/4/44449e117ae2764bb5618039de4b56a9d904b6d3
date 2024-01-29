@@ -1,0 +1,11 @@
+
+{	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(ô­‘ªÿÿÿÿÿ8à£­Ó1
+W
+java:S1128"5Remove this unused import 'com.CS516DE.domain.Order'.(ÊÕİ†ûÿÿÿÿ8á£­Ó1
+X
+java:S1128
+";Remove this unused import 'java.net.MalformedURLException'.(ªËŞˆ8á£­Ó1
+Y
+java:S1128"7Remove this unused import 'java.net.ProtocolException'.(é­Èğûÿÿÿÿ8á£­Ó1
+M
+java:S1128"+Remove this unused import 'java.util.List'.(Õë±Äøÿÿÿÿ8â£­Ó1

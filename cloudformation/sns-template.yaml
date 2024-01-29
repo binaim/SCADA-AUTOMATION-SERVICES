@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template for creating an SNS topic with email and Lambda subscriptions
+
+Resources:
+  MySNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: notification
+
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      TopicArn: !Ref MySNSTopic
+      Endpoint: biniamgg11@gmail.com
+
+  LambdaSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: lambda
+      TopicArn: !Ref MySNSTopic
+      Endpoint: arn:aws:lambda:us-east-2:915444981694:function:email-notification-service

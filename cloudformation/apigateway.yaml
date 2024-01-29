@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create an API Gateway with resources mapped to Lambda functions
+
+Resources:
+  MyApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: MyApiGateway
+
+  OrdersFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: orders.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: my-lambda-bucket
+        S3Key: orders-function.zip
+      Runtime: nodejs14.x
+
+  ProductsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: products.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: my-lambda-bucket
+        S3Key: products-function.zip
+      Runtime: nodejs14.x
+
+  NotificationsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: notifications.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: my-lambda-bucket
+        S3Key: notifications-function.zip
+      Runtime: nodejs14.x
+
+  OrdersResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      ParentId: !GetAtt MyApiGateway.RootResourceId
+      PathPart: orders
+
+  OrdersMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      ResourceId: !Ref OrdersResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OrdersFunction.Arn}/invocations"
+
+  ProductsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      ParentId: !GetAtt MyApiGateway.RootResourceId
+      PathPart: products
+
+  ProductsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      ResourceId: !Ref ProductsResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProductsFunction.Arn}/invocations"
+
+  NotificationsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      ParentId: !GetAtt MyApiGateway.RootResourceId
+      PathPart: notifications
+
+  NotificationsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MyApiGateway
+      ResourceId: !Ref NotificationsResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotificationsFunction.Arn}/invocations"
+
+Outputs:
+  ApiGatewayId:
+    Description: ID of the created API Gateway
+    Value: !Ref MyApiGateway
+
+  ApiGatewayEndpoint:
+    Description: Endpoint URL of the created API Gateway
+    Value: !Sub "https://${MyApiGateway}.execute-api.${AWS::Region}.amazonaws.com"

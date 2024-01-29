@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create an S3 bucket and upload a zip folder
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: Name for the S3 bucket
+    Default: my-lambda-bucket
+
+Resources:
+  MyBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+
+  MyZipFile:
+    Type: AWS::S3::Object
+    Properties:
+      Bucket: !Ref MyBucket
+      Key: my-lambda-function.zip
+      ContentType: application/zip
+      Body:
+        Fn::Base64:
+          !Sub |
+          ${file(file.zip)}
+
+Outputs:
+  BucketName:
+    Description: Name of the S3 bucket
+    Value: !Ref MyBucket
